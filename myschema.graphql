@@ -1,0 +1,395 @@
+type Query {
+  # Retrieve a specific profile by profile ID
+  profile(profileId: ID!): Profile
+
+  # Search for publications and profiles
+  search(
+    query: String!
+    type: SearchRequestTypes!
+    limit: Int = 10
+    cursor: String
+  ): SearchResult
+
+  # Get the feed for a specific profile
+  feed(request: FeedRequest!): PaginatedTimelineResult
+
+  # Get highlights for a specific profile
+  highlights(request: FeedHighlightsRequest!): PaginatedTimelineResult
+
+  # Get a list of pending follow approvals for a profile
+  pendingApproveFollows(
+    request: PendingApprovalFollowsRequest!
+  ): PendingApproveFollowsResult
+
+  # Check if a profile follows another profile
+  doesFollow(request: DoesFollowRequest!): DoesFollowResponse
+
+  # Get a list of followers for a profile
+  followers(request: FollowersRequest!): PaginatedFollowersResult
+
+  # Get a list of profiles followed by a specific address
+  following(request: FollowingRequest!): PaginatedFollowingResult
+
+  # Get the owned token IDs of a follower's NFTs
+  followerNftOwnedTokenIds(
+    request: FollowerNftOwnedTokenIdsRequest!
+  ): FollowerNftOwnedTokenIds
+
+  # Get a list of profiles based on specific criteria
+  exploreProfiles(request: ExploreProfilesRequest!): PaginatedProfileResult
+
+  # Get a list of publications based on specific criteria
+  explorePublications(
+    request: ExplorePublicationRequest!
+  ): ExplorePublicationResult
+
+  # Get a list of mutual followers between two profiles
+  mutualFollowersProfiles(
+    request: MutualFollowersProfilesQueryRequest!
+  ): PaginatedProfileResult
+
+  # Get notifications for a specific profile
+  notifications(
+    profileId: ID!
+    limit: Int = 10
+    cursor: String
+  ): PaginatedNotificationResult
+}
+
+type Mutation {
+  # Create a new profile
+  createProfile(input: CreateProfileInput!): Profile
+
+  # Update an existing profile
+  updateProfile(input: UpdateProfileInput!): Profile
+
+  # Follow a profile
+  followProfile(input: FollowProfileInput!): FollowProfileResponse
+
+  # Approve or reject a follow request
+  approveFollowRequest(input: ApproveFollowRequestInput!): FollowProfileResponse
+
+  # Create a new post
+  createPost(input: CreatePostInput!): Post
+
+  # Create a new comment
+  createComment(input: CreateCommentInput!): Comment
+
+  # Create a new mirror
+  createMirror(input: CreateMirrorInput!): Mirror
+
+  # Collect a publication
+  collectPublication(input: CollectPublicationInput!): Publication
+
+  # React to a publication
+  reactToPublication(input: ReactToPublicationInput!): Publication
+}
+
+type Subscription {
+  # Subscribe to new follower notifications for a specific profile
+  newFollowerNotification(profileId: ID!): NewFollowerNotification
+
+  # Subscribe to new collect notifications for a specific profile
+  newCollectNotification(profileId: ID!): NewCollectNotification
+
+  # Subscribe to new comment notifications for a specific profile
+  newCommentNotification(profileId: ID!): NewCommentNotification
+
+  # Subscribe to new mirror notifications for a specific profile
+  newMirrorNotification(profileId: ID!): NewMirrorNotification
+
+  # Subscribe to new mention notifications for a specific profile
+  newMentionNotification(profileId: ID!): NewMentionNotification
+
+  # Subscribe to new reaction notifications for a specific profile
+  newReactionNotification(profileId: ID!): NewReactionNotification
+}
+
+type Profile {
+  id: ID!
+  username: String!
+  name: String!
+  bio: String
+  avatarURL: String
+  coverURL: String
+  followersCount: Int!
+  followingCount: Int!
+  postsCount: Int!
+}
+
+type SearchResult {
+  profiles: [Profile]
+  publications: [Publication]
+}
+
+type PaginatedTimelineResult {
+  items: [Publication]
+  cursor: String
+  hasMore: Boolean!
+}
+
+type PaginatedFollowersResult {
+  followers: [Profile]
+  cursor: String
+  hasMore: Boolean!
+}
+
+type PaginatedFollowingResult {
+  following: [Profile]
+  cursor: String
+  hasMore: Boolean!
+}
+
+type FollowerNftOwnedTokenIds {
+  followerNftOwnedTokenIds: [String]
+}
+
+type PaginatedProfileResult {
+  profiles: [Profile]
+  cursor: String
+  hasMore: Boolean!
+}
+
+type ExplorePublicationResult {
+  publications: [Publication]
+  cursor: String
+  hasMore: Boolean!
+}
+
+type DoesFollowResponse {
+  doesFollow: Boolean!
+}
+
+type PendingApproveFollowsResult {
+  pendingApproveFollows: [Profile]
+  cursor: String
+  hasMore: Boolean!
+}
+
+type Notification {
+  id: ID!
+  type: NotificationType!
+  profile: Profile!
+  createdAt: DateTime!
+  read: Boolean!
+}
+
+
+enum SearchRequestTypes {
+  PROFILE
+  PUBLICATION
+  ALL
+}
+
+enum NotificationType {
+  FOLLOW
+  COLLECT
+  COMMENT
+  MIRROR
+  MENTION
+  REACTION
+}
+
+enum FeedRequest {
+  PROFILE
+  FOLLOWING
+  LIKES
+}
+
+enum FeedHighlightsRequest {
+  PROFILE
+  FOLLOWING
+  LIKES
+  HOT
+}
+
+enum PendingApprovalFollowsRequest {
+  SENT
+  RECEIVED
+}
+
+input CreateProfileInput {
+  username: String!
+  name: String!
+  bio: String
+  avatarURL: String
+  coverURL: String
+}
+
+input UpdateProfileInput {
+  profileId: ID!
+  name: String
+  bio: String
+  avatarURL: String
+  coverURL: String
+}
+
+input FollowProfileInput {
+  profileId: ID!
+}
+
+input ApproveFollowRequestInput {
+  requestId: ID!
+  approved: Boolean!
+}
+
+input CreatePostInput {
+  content: String!
+  mediaURLs: [String]
+}
+
+input CreateCommentInput {
+  postId: ID!
+  content: String!
+}
+
+input CreateMirrorInput {
+  publicationId: ID!
+  content: String!
+}
+
+input CollectPublicationInput {
+  publicationId: ID!
+}
+
+input ReactToPublicationInput {
+  publicationId: ID!
+  reactionType: ReactionTypes!
+}
+
+input DoesFollowRequest {
+  followerId: ID!
+  followeeId: ID!
+}
+
+input FollowersRequest {
+  profileId: ID!
+  limit: Int = 10
+  cursor: String
+}
+
+input FollowingRequest {
+  profileId: ID!
+  limit: Int = 10
+  cursor: String
+}
+
+input FollowerNftOwnedTokenIdsRequest {
+  profileId: ID!
+  followerId: ID!
+}
+
+input ExploreProfilesRequest {
+  limit: Int = 10
+  cursor: String
+}
+
+input ExplorePublicationRequest {
+  limit: Int = 10
+  cursor: String
+}
+
+input MutualFollowersProfilesQueryRequest {
+  profileId: ID!
+  otherProfileId: ID!
+  limit: Int = 10
+  cursor: String
+}
+
+type NewFollowerNotification {
+  profile: Profile!
+  follower: Profile!
+}
+
+type NewCollectNotification {
+  profile: Profile!
+  collector: Profile!
+  publication: Publication!
+}
+
+type NewCommentNotification {
+  profile: Profile!
+  commenter: Profile!
+  comment: Comment!
+}
+
+type NewMirrorNotification {
+  profile: Profile!
+  mirrorer: Profile!
+  mirror: Mirror!
+}
+
+type NewMentionNotification {
+  profile: Profile!
+  mentioner: Profile!
+  mention: Mention!
+}
+
+type NewReactionNotification {
+  profile: Profile!
+  reactor: Profile!
+  publication: Publication!
+  reactionType: ReactionTypes!
+}
+
+type Comment {
+  id: ID!
+  profile: Profile!
+  postId: ID!
+  content: String!
+  createdAt: DateTime!
+}
+
+type Post {
+  id: ID!
+  profile: Profile!
+  content: String!
+  mediaURLs: [String]
+  createdAt: DateTime!
+  likesCount: Int!
+  commentsCount: Int!
+  likedByMe: Boolean!
+}
+
+type Mirror {
+  id: ID!
+  profile: Profile!
+  publication: Publication!
+  content: String!
+  createdAt: DateTime!
+  likesCount: Int!
+  commentsCount: Int!
+  likedByMe: Boolean!
+}
+
+type Publication {
+  id: ID!
+  profile: Profile!
+  title: String!
+  content: String!
+  mediaURLs: [String]
+  createdAt: DateTime!
+  likesCount: Int!
+  commentsCount: Int!
+  likedByMe: Boolean!
+  collectedByMe: Boolean!
+}
+
+type Mention {
+  id: ID!
+  profile: Profile!
+  publication: Publication!
+  mentionedBy: Profile!
+  createdAt: DateTime!
+}
+
+enum ReactionTypes {
+  LIKE
+  LOVE
+  HAHA
+  WOW
+  SAD
+  ANGRY
+}
+
+scalar DateTime
